@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}New{% endif %} Bail Application - Bail Reckoner{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h2 class="text-lg leading-6 font-medium text-gray-900">
+            {% if form.instance.pk %}Edit{% else %}New{% endif %} Bail Application
+        </h2>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Case: {{ case.court_case_number }}
+        </p>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="rounded-md bg-red-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">
+                                There were errors with your submission
+                            </h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div>
+                <label for="{{ form.applicant_statement.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Applicant Statement
+                </label>
+                <div class="mt-1">
+                    <textarea id="{{ form.applicant_statement.id_for_label }}" name="{{ form.applicant_statement.html_name }}" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ form.applicant_statement.value|default:'' }}</textarea>
+                </div>
+                {% if form.applicant_statement.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.applicant_statement.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-500">Provide a detailed statement from the applicant's perspective.</p>
+            </div>
+            
+            <div>
+                <label for="{{ form.grounds_for_bail.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Grounds for Bail
+                </label>
+                <div class="mt-1">
+                    <textarea id="{{ form.grounds_for_bail.id_for_label }}" name="{{ form.grounds_for_bail.html_name }}" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ form.grounds_for_bail.value|default:'' }}</textarea>
+                </div>
+                {% if form.grounds_for_bail.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.grounds_for_bail.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-500">Specify the legal grounds for seeking bail.</p>
+            </div>
+            
+            <div>
+                <label for="{{ form.previous_bail_attempts.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Previous Bail Attempts
+                </label>
+                <div class="mt-1">
+                    <textarea id="{{ form.previous_bail_attempts.id_for_label }}" name="{{ form.previous_bail_attempts.html_name }}" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ form.previous_bail_attempts.value|default:'' }}</textarea>
+                </div>
+                {% if form.previous_bail_attempts.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.previous_bail_attempts.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-500">Describe any previous bail applications and their outcomes.</p>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'case_detail' case.case_id %}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancel
+                </a>
+                <button type="submit" name="save_draft" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Save as Draft
+                </button>
+                <button type="submit" name="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Bail Reckoner{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h2 class="text-lg leading-6 font-medium text-gray-900">
+            Welcome, {{ user.first_name }} {{ user.last_name }}
+        </h2>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            {{ user.get_user_type_display }}
+        </p>
+    </div>
+    
+    <!-- Stats Overview -->
+    <div class="border-t border-gray-200">
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="text-center">
+                <span class="block text-2xl font-bold text-indigo-600">{{ cases_count }}</span>
+                <span class="block text-sm font-medium text-gray-500">Total Cases</span>
+            </div>
+            <div class="text-center mt-5 sm:mt-0">
+                <span class="block text-2xl font-bold text-indigo-600">{{ pending_applications }}</span>
+                <span class="block text-sm font-medium text-gray-500">Pending Applications</span>
+            </div>
+            <div class="text-center mt-5 sm:mt-0">
+                <span class="block text-2xl font-bold text-indigo-600">{{ approved_applications }}</span>
+                <span class="block text-sm font-medium text-gray-500">Approved Applications</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Activity</h3>
+    </div>
+    <div class="border-t border-gray-200">
+        <ul class="divide-y divide-gray-200">
+            {% for activity in recent_activities %}
+            <li class="px-4 py-4 sm:px-6">
+                <div class="flex items-center">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-indigo-600 truncate">{{ activity.title }}</p>
+                        <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                    </div>
+                    <div class="ml-4 flex-shrink-0">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            {{ activity.timestamp|date:"M d, Y" }}
+                        </span>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-4 py-4 sm:px-6">
+                <p class="text-sm text-gray-500">No recent activity found.</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Quick Actions</h3>
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <a href="{% url 'create_case' %}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Create New Case
+            </a>
+            <a href="{% url 'case_list' %}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                View All Cases
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bail Application Status -->
+{% if recent_applications %}
+<div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Bail Applications</h3>
+    </div>
+    <div class="border-t border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case Number</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AI Score</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for application in recent_applications %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ application.case.court_case_number }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if application.status == 'approved' %}bg-green-100 text-green-800
+                                {% elif application.status == 'rejected' %}bg-red-100 text-red-800
+                                {% elif application.status == 'ai_assessed' %}bg-blue-100 text-blue-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ application.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if application.ai_assessment_score %}
+                                {{ application.ai_assessment_score }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ application.submitted_at|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'view_application' application.application_id %}" class="text-indigo-600 hover:text-indigo-900">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Bail Application - {{ application.case.court_case_number }} - Bail Reckoner{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <div>
+            <h2 class="text-lg leading-6 font-medium text-gray-900">
+                Bail Application
+            </h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Case: {{ application.case.court_case_number }}
+            </p>
+        </div>
+        <div>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                {% if application.status == 'approved' %}bg-green-100 text-green-800
+                {% elif application.status == 'rejected' %}bg-red-100 text-red-800
+                {% elif application.status == 'ai_assessed' %}bg-blue-100 text-blue-800
+                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                {{ application.get_status_display }}
+            </span>
+        </div>
+    </div>
+    <div class="border-t border-gray-200">
+        <dl>
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Applicant</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ application.case.applicant.first_name }} {{ application.case.applicant.last_name }}</dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Submitted At</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {% if application.submitted_at %}
+                        {{ application.submitted_at|date:"F d, Y H:i" }}
+                    {% else %}
+                        Not submitted yet
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Reviewed At</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {% if application.reviewed_at %}
+                        {{ application.reviewed_at|date:"F d, Y H:i" }}
+                    {% else %}
+                        Pending review
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">AI Assessment Score</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {% if application.ai_assessment_score %}
+                        <div class="flex items-center">
+                            <span class="text-lg font-semibold mr-2">{{ application.ai_assessment_score }}</span>
+                            <div class="w-48 bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-{% if application.ai_assessment_score >= 70 %}green{% elif application.ai_assessment_score >= 40 %}yellow{% else %}red{% endif %}-600 h-2.5 rounded-full" style="width: {{ application.ai_assessment_score }}%"></div>
+                            </div>
+                        </div>
+                    {% else %}
+                        Not assessed yet
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Blockchain Verification</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {% if application.blockchain_hash %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Verified</span>
+                        <span class="text-xs text-gray-500 ml-2">{{ application.blockchain_hash }}</span>
+                    {% else %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Not verified</span>
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<!-- Application Content -->
+<div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Application Content</h3>
+    </div>
+    <div class="border-t border-gray-200">
+        <div class="px-4 py-5 sm:px-6">
+            <h4 class="text-md font-medium text-gray-900">Applicant Statement</h4>
+            <div class="mt-2 text-sm text-gray-500">
+                <p>{{ application.applicant_statement|linebreaks }}</p>
+            </div>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <h4 class="text-md font-medium text-gray-900">Grounds for Bail</h4>
+            <div class="mt-2 text-sm text-gray-500">
+                <p>{{ application.grounds_for_bail|linebreaks }}</p>
+            </div>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <h4 class="text-md font-medium text-gray-900">Previous Bail Attempts</h4>
+            <div class="mt-2 text-sm text-gray-500">
+                <p>{{ application.previous_bail_attempts|linebreaks|default:"No previous bail attempts." }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Assessment Report -->
+{% if application.ai_assessment_report %}
+<div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">AI Assessment Report</h3>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+        <div class="prose max-w-none">
+            {{ application.ai_assessment_report|safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Judicial Review -->
+{% if application.status == 'approved' or application.status == 'rejected' %}
+<div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Judicial Review</h3>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+        <div class="prose max-w-none">
+            {{ application.judicial_notes|safe|default:"No judicial notes provided." }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Action Buttons -->
+<div class="mt-8 flex justify-end space-x-3">
+    <a href="{% url 'case_detail' application.case.case_id %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Back to Case
+    </a>
+    
+    {% if application.status == 'draft' %}
+        <a href="{% url 'edit_application' application.application_id %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Edit Application
+        </a>
+    {% endif %}
+    
+    {% if application.status == 'submitted' and user.user_type == 'judge' %}
+        <a href="{% url 'review_application' application.application_id %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Review Application
+        </a>
+    {% endif %}
+    
+    {% if application.status == 'submitted' and not application.ai_assessment_score %}
+        <a href="{% url 'assess_application' application.application_id %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            Run AI Assessment
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
